@@ -123,6 +123,17 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ domain: data.domain, price: data.price || 15 }),
               });
+
+              if (!res.ok) {
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                  const errorData = await res.json();
+                  throw new Error(errorData.error || 'Checkout failed to initialize.');
+                } else {
+                  throw new Error(`Server returned HTTP ${res.status}. The backend might be deploying or misconfigured.`);
+                }
+              }
+
               const checkoutData = await res.json();
               if (checkoutData.url) {
                 window.location.href = checkoutData.url;

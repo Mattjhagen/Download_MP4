@@ -7,9 +7,12 @@ const fs = require('fs');
 const { randomUUID } = require('crypto');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const { EPub } = require('epub2');
 
 require('dotenv').config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API;
+const stripe = stripeKey ? require('stripe')(stripeKey) : null;
 
 if (ffmpegPath) {
   ffmpeg.setFfmpegPath(ffmpegPath);
@@ -24,6 +27,11 @@ const MAX_CONCURRENT_CONVERSIONS = 3;
 if (!fs.existsSync(TMP_DIR)) {
   fs.mkdirSync(TMP_DIR, { recursive: true });
 }
+const UPLOADS_DIR = path.join(TMP_DIR, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+const upload = multer({ dest: UPLOADS_DIR });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -32,8 +40,13 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
   const sig = req.headers['stripe-signature'];
   let event;
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK;
+  if (!stripe || !webhookSecret) {
+    return res.status(400).send(`Webhook Error: Stripe or Webhook Secret not configured`);
+  }
+
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -300,9 +313,9 @@ app.post('/api/create-checkout-session', async (req, res) => {
       return res.status(400).json({ error: 'Missing domain name or price' });
     }
 
-    if (!process.env.STRIPE_SECRET_KEY) {
+    if (!stripe) {
       console.warn('Stripe secret key is not set. Payments will fail.');
-      return res.status(500).json({ error: 'Stripe is not configured perfectly.' });
+      return res.status(500).json({ error: 'Stripe is not configured perfectly. Missing STRIPE_API environment variable.' });
     }
 
     // Dynadot gives us the price, we pass it to Stripe in cents
@@ -336,6 +349,53 @@ app.post('/api/create-checkout-session', async (req, res) => {
     console.error('Checkout Session error:', error);
     res.status(500).json({ error: error.message });
   }
+});
+
+app.post('/api/parse-epub', upload.single('epubFile'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const epubPath = req.file.path;
+  const epub = new EPub(epubPath, '/imagewebroot/', '/articlewebroot/');
+
+  epub.on('end', () => {
+    const chapters = [];
+    let count = 0;
+
+    const processNext = (index) => {
+      if (index >= epub.flow.length) {
+        fs.unlink(epubPath, () => { });
+        return res.json(chapters);
+      }
+
+      const chapterMetadata = epub.flow[index];
+      epub.getChapter(chapterMetadata.id, (err, text) => {
+        if (!err && text) {
+          // Strip HTML tags for clean TTS reading
+          const cleanText = text.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+          if (cleanText.length > 0) {
+            chapters.push({
+              id: chapterMetadata.id,
+              title: chapterMetadata.title || `Chapter ${count + 1}`,
+              text: cleanText
+            });
+            count++;
+          }
+        }
+        processNext(index + 1);
+      });
+    };
+
+    processNext(0);
+  });
+
+  epub.on('error', (err) => {
+    fs.unlink(epubPath, () => { });
+    res.status(500).json({ error: 'Failed to parse EPUB file' });
+  });
+
+  epub.parse();
 });
 
 app.listen(PORT, () => {
