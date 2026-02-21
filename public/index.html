@@ -108,6 +108,171 @@
     </div>
   </div>
 
+  <!-- Domain Search Section -->
+  <section class="max-w-5xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-xl shadow-md p-8 text-center border-t-4 border-[#5b0ae5]">
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Domain</h3>
+      <p class="text-gray-600 mb-6">Search for available domain names and register them instantly via Dynadot.</p>
+
+      <div
+        class="flex flex-col sm:flex-row shadow-sm rounded-lg overflow-hidden border border-gray-300 max-w-2xl mx-auto focus-within:ring-2 focus-within:ring-[#5b0ae5]">
+        <input type="text" id="domainName" class="flex-grow p-4 outline-none text-gray-800"
+          placeholder="Enter domain name (e.g., example.com)">
+        <button id="checkDomainBtn"
+          class="bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold px-8 py-4 transition-colors">
+          Search
+        </button>
+      </div>
+      <div id="domainResults" class="mt-6 text-left max-w-2xl mx-auto empty:hidden"></div>
+    </div>
+  </section>
+
+  <!-- VibeCodes Portfolio Section -->
+  <section class="max-w-7xl mx-auto px-4 py-12 mb-12">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-bold text-gray-900 mb-3">Packie CSS Custom Web Design & Development</h2>
+      <p class="text-gray-600">Creating beautiful, functional websites that help businesses grow.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Portfolio Item 1: Hagen Blacksmithing -->
+      <div
+        class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow border border-gray-100">
+        <div class="h-48 bg-[#9c78f7] flex items-center justify-center relative overflow-hidden group">
+          <img src="screenshots/hagen-blacksmithing-screenshot.jpg"
+            class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="p-6 flex-grow flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Hagen Blacksmithing</h3>
+          <p class="text-gray-600 text-sm mb-4 flex-grow">North Dakota's master blacksmith creating exceptional ironwork
+            with traditional craftsmanship and modern quality</p>
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Traditional
+              Craft</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Custom
+              Ironwork</span>
+          </div>
+          <a href="https://hagen-blacksmithing.vercel.app" target="_blank"
+            class="text-center text-[#5b0ae5] border border-[#5b0ae5] hover:bg-[#5b0ae5] hover:text-white font-medium py-2 rounded-lg transition-colors">View
+            Live Site</a>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 2: P3 Lending -->
+      <div
+        class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow border border-gray-100">
+        <div class="h-48 bg-[#8a5df5] flex items-center justify-center relative overflow-hidden group">
+          <img src="screenshots/p3lending-screenshot.jpg"
+            class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="p-6 flex-grow flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">P3 Lending</h3>
+          <p class="text-gray-600 text-sm mb-4 flex-grow">Decentralized peer-to-peer lending platform revolutionizing
+            finance through blockchain technology and Bitcoin</p>
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">DeFi</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Blockchain</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Bitcoin</span>
+          </div>
+          <a href="https://p3lend.netlify.app" target="_blank"
+            class="text-center text-[#5b0ae5] border border-[#5b0ae5] hover:bg-[#5b0ae5] hover:text-white font-medium py-2 rounded-lg transition-colors">View
+            Live Site</a>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 3: PacMac Marketplace -->
+      <div
+        class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow border border-gray-100">
+        <div class="h-48 bg-[#7b42f3] flex items-center justify-center relative overflow-hidden group">
+          <img src="screenshots/pacmac-screenshot.jpg"
+            class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="p-6 flex-grow flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">PacMac Marketplace</h3>
+          <p class="text-gray-600 text-sm mb-4 flex-grow">Local trading platform for phones and electronics, helping
+            users save $200+ per transaction through secure neighborhood trading</p>
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Marketplace</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">E-commerce</span>
+          </div>
+          <a href="https://www.pacmacmobile.com" target="_blank"
+            class="text-center text-[#5b0ae5] border border-[#5b0ae5] hover:bg-[#5b0ae5] hover:text-white font-medium py-2 rounded-lg transition-colors">View
+            Live Site</a>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 4: NexusMail AI -->
+      <div
+        class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow border border-gray-100">
+        <div class="h-48 bg-[#f8f9fa] flex items-center justify-center relative overflow-hidden group">
+          <img src="screenshots/nexusmail-screenshot.webp"
+            class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="p-6 flex-grow flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">NexusMail AI</h3>
+          <p class="text-gray-600 text-sm mb-4 flex-grow">Database configuration interface and activation portal for P3
+            internal tools via Supabase credentials</p>
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Internal Tools</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Database</span>
+          </div>
+          <a href="https://nexusmail.space/" target="_blank"
+            class="text-center text-[#5b0ae5] border border-[#5b0ae5] hover:bg-[#5b0ae5] hover:text-white font-medium py-2 rounded-lg transition-colors">View
+            Live Site</a>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 5: FinchWire -->
+      <div
+        class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow border border-gray-100">
+        <div class="h-48 bg-[#111827] flex items-center justify-center relative overflow-hidden group">
+          <img src="screenshots/finchwire-screenshot.png"
+            class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="p-6 flex-grow flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">FinchWire</h3>
+          <p class="text-gray-600 text-sm mb-4 flex-grow">A daily newswire and daily briefing providing short,
+            opinionated summaries for the curious mind.</p>
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">News</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Daily Briefing</span>
+          </div>
+          <a href="https://finchwire.site/" target="_blank"
+            class="text-center text-[#5b0ae5] border border-[#5b0ae5] hover:bg-[#5b0ae5] hover:text-white font-medium py-2 rounded-lg transition-colors">View
+            Live Site</a>
+        </div>
+      </div>
+
+      <!-- Portfolio Item 6: IceStorm -->
+      <div
+        class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow border border-gray-100">
+        <div class="h-48 bg-[#e0f2fe] flex items-center justify-center relative overflow-hidden group">
+          <img src="screenshots/icestorm-screenshot.png"
+            class="absolute w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="p-6 flex-grow flex flex-col">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">IceStorm</h3>
+          <p class="text-gray-600 text-sm mb-4 flex-grow">Community Safety Network monitoring interface for real-time
+            alerts and safety info.</p>
+          <div class="flex flex-wrap gap-2 mb-6">
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Community</span>
+            <span class="bg-[#f3f0ff] text-[#5b0ae5] text-xs font-semibold px-3 py-1 rounded-full">Safety</span>
+          </div>
+          <a href="https://icestorm.site/" target="_blank"
+            class="text-center text-[#5b0ae5] border border-[#5b0ae5] hover:bg-[#5b0ae5] hover:text-white font-medium py-2 rounded-lg transition-colors">View
+            Live Site</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- Scripts -->
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>

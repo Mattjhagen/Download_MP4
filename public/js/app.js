@@ -54,4 +54,69 @@
       setBusy(false);
     }
   });
+
+  // --- Domain Search Logic ---
+  const checkDomainBtn = document.getElementById('checkDomainBtn');
+  const domainNameInput = document.getElementById('domainName');
+  const domainResults = document.getElementById('domainResults');
+
+  if (checkDomainBtn && domainNameInput && domainResults) {
+    const performDomainSearch = async () => {
+      const domain = domainNameInput.value.trim();
+      if (!domain) {
+        domainResults.innerHTML = '<p class="text-red-500 font-medium">Please enter a domain name.</p>';
+        return;
+      }
+
+      // Basic validation
+      const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/;
+      if (!domainRegex.test(domain)) {
+        domainResults.innerHTML = '<p class="text-red-500 font-medium">Please enter a valid domain (e.g., example.com).</p>';
+        return;
+      }
+
+      domainResults.innerHTML = '<p class="text-gray-600 font-medium animate-pulse">Checking availability...</p>';
+
+      try {
+        const apiBase = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : '';
+        const response = await fetch(apiBase + '/api/check-domain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain }),
+        });
+
+        const data = await response.json();
+
+        if (data.available) {
+          const priceStr = data.price ? `$ ${data.price}` : 'Contact for pricing';
+          domainResults.innerHTML = `
+            <div class="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-center">
+              <div>
+                <p class="font-bold text-lg text-green-700">✅ ${data.domain} is available!</p>
+                <p class="text-sm">Price: ${priceStr}</p>
+              </div>
+              <a href="https://www.dynadot.com/" target="_blank" class="mt-4 sm:mt-0 bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                Register Domain
+              </a>
+            </div>
+          `;
+        } else {
+          domainResults.innerHTML = `
+            <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg">
+              <p class="font-bold text-lg text-red-700">❌ ${data.domain} is not available</p>
+              <p class="text-sm">This domain is already registered. Try searching for a different domain name.</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Domain search error:', error);
+        domainResults.innerHTML = '<p class="text-red-500 font-medium">Error checking domain. Please try again later.</p>';
+      }
+    };
+
+    checkDomainBtn.addEventListener('click', performDomainSearch);
+    domainNameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') performDomainSearch();
+    });
+  }
 })();

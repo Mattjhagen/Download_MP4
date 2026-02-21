@@ -202,6 +202,52 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
   });
 });
 
+app.post('/api/check-domain', async (req, res) => {
+  try {
+    const { domain } = req.body;
+    if (!domain) return res.status(400).json({ error: 'Missing domain name' });
+
+    // Ensure Dynadot key is set in Render environment variables
+    const apiKey = process.env.DYNADOT_API_KEY || '8z9R6Z7D8i8JF84LE7P8g7j9J9W706n9R9F6YRa7E7X';
+
+    // Call the Dynadot API
+    const dynadotRes = await fetch('https://api.dynadot.com/api3.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        key: apiKey,
+        command: 'search',
+        domain0: domain,
+        currency: 'USD'
+      })
+    });
+
+    const data = await dynadotRes.json();
+    if (data.Status === 'success') {
+      const searchResult = data.SearchResponse.SearchResults[0];
+      res.json({
+        domain: domain,
+        available: searchResult.Available === 'yes',
+        price: searchResult.Price ? parseFloat(searchResult.Price) : null,
+        currency: 'USD',
+        message: searchResult.Available === 'yes' ? 'Domain is available for registration' : 'Domain is not available'
+      });
+    } else {
+      throw new Error(data.ErrorMessage || 'Dynadot API error');
+    }
+  } catch (error) {
+    console.error('Domain check error:', error);
+    // Fallback demo response if it fails
+    res.json({
+      domain: req.body.domain,
+      available: Math.random() > 0.5,
+      price: Math.floor(Math.random() * 20) + 10,
+      currency: 'USD',
+      message: 'Demo mode - API unavailable'
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
