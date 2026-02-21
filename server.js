@@ -11,7 +11,8 @@ const multer = require('multer');
 const { EPub } = require('epub2');
 
 require('dotenv').config();
-const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API;
+const stripeKeyRaw = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API;
+const stripeKey = stripeKeyRaw ? stripeKeyRaw.trim() : null;
 const stripe = stripeKey ? require('stripe')(stripeKey) : null;
 
 if (ffmpegPath) {
@@ -40,7 +41,8 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
   const sig = req.headers['stripe-signature'];
   let event;
 
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK;
+  const webhookSecretRaw = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK;
+  const webhookSecret = webhookSecretRaw ? webhookSecretRaw.trim() : null;
   if (!stripe || !webhookSecret) {
     return res.status(400).send(`Webhook Error: Stripe or Webhook Secret not configured`);
   }
