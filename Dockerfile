@@ -1,5 +1,5 @@
-# Use a Node.js base image that includes a standard Linux environment
-FROM node:18-bullseye-slim
+# Use a Node.js base image on Debian Bookworm (includes Python 3.11)
+FROM node:20-bookworm-slim
 
 # Install FFmpeg, Python 3, and curl (required for yt-dlp)
 RUN apt-get update && apt-get install -y \
@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Download latest compiled linux yt-dlp binary (bypasses python version requirement)
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp \
+# Download standard yt-dlp (requires Python 3.10+) and make it executable
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp
 
 # Set yt-dlp path for the server to use

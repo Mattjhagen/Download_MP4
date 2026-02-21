@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
             donateBtn.textContent = 'Wait...';
             donateBtn.disabled = true;
             try {
-                const response = await fetch('/api/create-donation-session', { method: 'POST' });
+                const apiBase = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : '';
+                const response = await fetch(apiBase + '/api/create-donation-session', { method: 'POST' });
                 const data = await response.json();
                 if (data.url) {
                     window.location.href = data.url;
@@ -68,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('epubFile', file);
 
         try {
-            const response = await fetch('/api/parse-epub', {
+            const apiBase = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : '';
+            const response = await fetch(apiBase + '/api/parse-epub', {
                 method: 'POST',
                 body: formData
             });
