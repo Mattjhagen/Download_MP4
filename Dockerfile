@@ -1,24 +1,24 @@
-FROM node:20-bookworm-slim
+# Use a Node.js base image that includes a standard Linux environment
+FROM node:18-bullseye-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install FFmpeg and Python 3 (required for yt-dlp)
+RUN apt-get update && apt-get install -y \
     ffmpeg \
     python3 \
-    python3-pip \
-    ca-certificates \
-    && pip3 install --break-system-packages yt-dlp \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Set the working directory inside the container
 WORKDIR /app
 
+# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install
 
-COPY server.js ./
-COPY public ./public
+# Copy the rest of your backend code
+COPY . .
 
-ENV NODE_ENV=production
-ENV PORT=3000
+# Expose the port your API uses
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Start the server
+CMD ["npm", "start"]
