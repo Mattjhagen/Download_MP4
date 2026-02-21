@@ -1,10 +1,11 @@
 # Use a Node.js base image on Debian Bookworm (includes Python 3.11)
 FROM node:20-bookworm-slim
 
-# Install FFmpeg, Python 3, and curl (required for yt-dlp)
+# Install FFmpeg, Python 3, pip, and curl
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     python3 \
+    python3-pip \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
