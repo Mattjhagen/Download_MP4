@@ -1,13 +1,18 @@
 const express = require('express');
 const youtubedl = require('youtube-dl-exec');
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 require('dotenv').config();
+
+if (ffmpegPath) {
+  ffmpeg.setFfmpegPath(ffmpegPath);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -119,8 +124,8 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
         return res.status(400).json({ error: 'Unsupported or invalid video URL' });
       }
 
-      videoFile = path.join(TMP_DIR, `${uuidv4()}.mp4`);
-      audioFile = path.join(TMP_DIR, `${uuidv4()}.mp3`);
+      videoFile = path.join(TMP_DIR, `${randomUUID()}.mp4`);
+      audioFile = path.join(TMP_DIR, `${randomUUID()}.mp3`);
       const exec = getYtDlpExec();
 
       const conversionPromise = (async () => {
