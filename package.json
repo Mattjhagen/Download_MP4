@@ -1,0 +1,33 @@
+{
+  "name": "video-mp3-converter",
+  "version": "1.0.0",
+  "description": "Free video to MP3 converter - YouTube, Twitter, Facebook and more",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mattjhagen/Download_MP4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mattjhagen/Download_MP4/issues"
+  },
+  "homepage": "https://github.com/Mattjhagen/Download_MP4#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "uuid": "^13.0.0",
+    "youtube-dl-exec": "^3.1.1"
+  }
+}

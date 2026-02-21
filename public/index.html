@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Video to MP3 Converter | YouTube, Twitter, Facebook to MP3</title>
+  <meta name="description" content="Convert video to MP3 free. Paste a YouTube, Twitter, Facebook, Vimeo or TikTok URL and download audio as MP3. No sign-up, no ads.">
+  <meta name="keywords" content="free YouTube to MP3 converter, video to MP3, download MP3, YouTube MP3, Twitter video to MP3, Facebook video download">
+  <link rel="canonical" href="/">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Free Video to MP3 Converter",
+    "description": "Convert video URLs to MP3 audio. Supports YouTube, Twitter, Facebook, Vimeo and more.",
+    "applicationCategory": "MultimediaApplication",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg mx-4">
+    <header>
+      <h1 class="text-2xl font-bold mb-2 text-gray-900">Video to MP3 Converter</h1>
+      <p class="text-gray-600 text-sm mb-4">Paste a video URL from YouTube, Twitter, Facebook, Vimeo or TikTok and download the audio as MP3.</p>
+    </header>
+    <main>
+      <form id="convertForm" class="space-y-4" novalidate>
+        <div>
+          <label for="url" class="block mb-2 font-medium text-gray-800">Video URL</label>
+          <input id="url" name="url" type="url" inputmode="url" autocomplete="url" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="https://www.youtube.com/watch?v=..." required>
+        </div>
+        <button id="convertBtn" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-3 rounded-lg w-full transition-colors">Convert to MP3</button>
+      </form>
+      <div id="status" class="mt-4 text-sm text-gray-700 min-h-[1.5rem]" role="status" aria-live="polite"></div>
+    </main>
+    <footer class="mt-6 pt-4 border-t border-gray-200 text-center text-sm text-gray-500">
+      <p>Only download content you own or have permission to use. <a href="/terms.html" class="text-blue-600 hover:underline">Terms of Service</a></p>
+    </footer>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
