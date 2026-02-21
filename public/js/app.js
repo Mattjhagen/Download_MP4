@@ -46,17 +46,36 @@
       });
       const contentType = response.headers.get('Content-Type') || '';
       if (!response.ok) {
-        const data = contentType.includes('application/json') ? await response.json() : {};
-        setStatus('Error: ' + (data.error || response.statusText), true);
+        let errorMsg = response.statusText;
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          errorMsg = data.details || data.error || errorMsg;
+        } else {
+          errorMsg = await response.text();
+        }
+        setStatus('Error: ' + errorMsg, true);
         setBusy(false);
         return;
       }
       const blob = await response.blob();
+
+      // Attempt to get filename from Content-Disposition header if possible
+      let filename = format === 'mp3' ? 'audio.mp3' : 'video.mp4';
+      const disposition = response.headers.get('Content-Disposition');
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename="([^"]+)"/.exec(disposition);
+        if (matches != null && matches[1]) filename = matches[1];
+      }
+
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = format === 'mp3' ? 'audio.mp3' : 'video.mp4';
+      const urlObject = window.URL.createObjectURL(blob);
+      link.href = urlObject;
+      link.download = filename;
+      document.body.appendChild(link);
       link.click();
-      window.URL.revokeObjectURL(link.href);
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(urlObject);
+
       setStatus('Download complete!');
     } catch (err) {
       console.error(err);

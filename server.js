@@ -86,7 +86,24 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
 });
 
 app.use(express.json());
-app.use(cors({ origin: true }));
+
+const allowedOrigins = [
+  'https://globalnexus.online',
+  'https://www.globalnexus.online'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin) || origin.endsWith('.netlify.app')) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+  }
+}));
 
 const convertRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -177,6 +194,7 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
     let audioFile;
     let finalFile;
     let timeoutId;
+    const reqId = randomUUID();
 
     try {
       const { url, format = 'mp3' } = req.body;
@@ -185,47 +203,44 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
         return res.status(400).json({ error: 'Unsupported or invalid video URL' });
       }
 
-      videoFile = path.join(TMP_DIR, `${randomUUID()}.mp4`);
-      audioFile = path.join(TMP_DIR, `${randomUUID()}.mp3`);
       const exec = getYtDlpExec();
+      const uniqueId = randomUUID();
+      videoFile = path.join(TMP_DIR, `${uniqueId}.%(ext)s`);
 
       const conversionPromise = (async () => {
         if (format === 'mp3') {
-          // Audio only flow
+          // Audio only flow using robust retry params
+          audioFile = path.join(TMP_DIR, `${uniqueId}.mp3`);
           await exec.exec(url.trim(), {
-            output: videoFile,
-            format: 'bestaudio/best',
-            noCheckCertificates: true,
-            noWarnings: true,
-            preferFreeFormats: false,
+            extractAudio: true,
+            audioFormat: 'mp3',
+            audioQuality: 0,
+            output: audioFile,
+            noPlaylist: true,
+            retries: 10,
+            fragmentRetries: 10,
+            socketTimeout: 30,
+            forceIpv4: true,
             extractorArgs: 'youtube:player_client=android,web',
-          });
-
-          await new Promise((resolve, reject) => {
-            ffmpeg(videoFile)
-              .noVideo()
-              .audioCodec('libmp3lame')
-              .audioBitrate(128)
-              .save(audioFile)
-              .on('end', () => resolve())
-              .on('error', (err) => reject(err));
           });
           finalFile = audioFile;
 
         } else {
           // Video flow (mp4_hd or mp4_sd)
-          // bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best -> this ensures we get a single mp4 file or merge them
+          videoFile = path.join(TMP_DIR, `${uniqueId}.mp4`);
           const formatString = format === 'mp4_hd'
-            ? 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-            : 'bestvideo[ext=mp4][height<=480]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+            ? 'bestvideo[height<=1080]+bestaudio/best[height<=1080]'
+            : 'bestvideo[height<=480]+bestaudio/best[height<=480]';
 
           await exec.exec(url.trim(), {
             output: videoFile,
             format: formatString,
             mergeOutputFormat: 'mp4',
-            noCheckCertificates: true,
-            noWarnings: true,
-            preferFreeFormats: false,
+            noPlaylist: true,
+            retries: 10,
+            fragmentRetries: 10,
+            socketTimeout: 30,
+            forceIpv4: true,
             extractorArgs: 'youtube:player_client=android,web',
           });
           finalFile = videoFile;
@@ -239,26 +254,41 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
       await Promise.race([conversionPromise, timeoutPromise]);
       clearTimeout(timeoutId);
 
+      // Simple streaming
       const downloadName = format === 'mp3' ? 'audio.mp3' : 'video.mp4';
+      const contentType = format === 'mp3' ? 'audio/mpeg' : 'video/mp4';
+
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
 
       res.download(finalFile, downloadName, (err) => {
         clearTimeout(timeoutId);
-        removeFile(videoFile);
         removeFile(audioFile);
-        if (err && !res.headersSent) console.error('Download send error:', err);
+        removeFile(videoFile);
+        if (err && !res.headersSent) {
+          console.error('Download send error:', err);
+        }
       });
     } catch (error) {
       if (timeoutId) clearTimeout(timeoutId);
-      removeFile(videoFile);
       removeFile(audioFile);
-      console.error('Conversion error:', error);
-      const message = error.message || 'Conversion failed';
-      res.status(500).json({ error: message });
+      removeFile(videoFile);
+      const stderr = error.stderr || error.message || 'Unknown yt-dlp error';
+      console.error(`[${reqId}] Conversion error trace:`, stderr);
+
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: 'Conversion failed',
+          code: error.code || 1,
+          details: stderr,
+          requestId: reqId
+        });
+      }
     }
   };
 
   runWithConcurrencyLimit(run).catch((err) => {
-    if (!res.headersSent) res.status(500).json({ error: err.message || 'Conversion failed' });
+    if (!res.headersSent) res.status(500).json({ error: err.message || 'Concurrency limit reached' });
   });
 });
 

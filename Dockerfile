@@ -8,12 +8,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Download standard yt-dlp (requires Python 3.10+) and make it executable
-RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
-    && chmod a+rx /usr/local/bin/yt-dlp
+# Create a virtual environment and install yt-dlp
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip3 install -U yt-dlp
 
 # Set yt-dlp path for the server to use
-ENV YT_DLP_PATH=/usr/local/bin/yt-dlp
+ENV YT_DLP_PATH=/opt/venv/bin/yt-dlp
 
 # Set the working directory inside the container
 WORKDIR /app

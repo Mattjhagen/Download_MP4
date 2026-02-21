@@ -29,8 +29,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Exclude all API requests and non-GET requests
+    if (event.request.method !== 'GET' || event.request.url.includes('/api/')) {
+        return;
+    }
+
     // Only cache GET requests going to our origin
-    if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+    if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
 
