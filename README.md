@@ -75,4 +75,8 @@ Use only for content you own or have permission to download. See [Terms of Servi
 
 ## Deploying
 
-On your server: install Node.js, ffmpeg, and (if needed) yt-dlp. Run the app with a process manager (e.g. **pm2**) behind a reverse proxy (e.g. **Nginx**) with HTTPS (e.g. Let’s Encrypt). Rate limiting and CORS are already configured in the app.
+**Option A – GitHub Pages + Render (recommended):** Frontend in `docs/` for GitHub Pages; backend on Render via Docker. See steps below.
+
+**Option B – Your own server:** On your server: install Node.js, ffmpeg, and (if needed) yt-dlp. Run the app with a process manager (e.g. **pm2**) behind a reverse proxy (e.g. **Nginx**) with HTTPS (e.g. Let’s Encrypt). Rate limiting and CORS are already configured in the app.
+
+**GitHub Pages + Render steps:** (1) Push repo, then open [Render Blueprint](https://dashboard.render.com/blueprint/new?repo=https://github.com/Mattjhagen/Download_MP4) → sign in with GitHub → select Download_MP4 → Apply → copy service URL. (2) Repo **Settings** → **Pages** → Source: Deploy from branch → branch **main**, folder **/docs** → Save. (3) Edit `docs/js/config.js`: set `window.API_BASE = 'https://your-render-url.onrender.com';` then commit and push. (4) **Custom domain:** The site is configured for **https://globalnexus.online**. In GitHub Pages settings, add `globalnexus.online` as a custom domain and set the required DNS records (CNAME or A) at your registrar.

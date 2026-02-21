@@ -1,0 +1,11 @@
+# Render Blueprint: backend only (frontend on GitHub Pages)
+# After deploy: set docs/js/config.js API_BASE to this service's URL and push.
+services:
+  - type: web
+    name: download-mp4-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
