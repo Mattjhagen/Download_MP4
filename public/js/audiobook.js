@@ -35,6 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const nowPlayingTitle = document.getElementById('nowPlayingTitle');
     const ttsProvider = document.getElementById('ttsProvider');
     const ttsApiKey = document.getElementById('ttsApiKey');
+    const playbackSpeed = document.getElementById('playbackSpeed');
+    const speedValue = document.getElementById('speedValue');
+
+    if (playbackSpeed && speedValue) {
+        playbackSpeed.addEventListener('input', (e) => {
+            const speed = parseFloat(e.target.value).toFixed(1);
+            speedValue.textContent = `${speed}x`;
+            if (audioPlayer) {
+                audioPlayer.playbackRate = speed;
+            }
+        });
+    }
 
     let currentChapters = [];
     let isGenerating = false;
@@ -156,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const provider = ttsProvider.value;
         const apiKey = ttsApiKey.value.trim();
 
-        if (!apiKey) {
+        if (provider !== 'kokoro' && !apiKey) {
             alert(`Please enter your ${provider.toUpperCase()} API Key first.`);
             return;
         }
@@ -180,6 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAudioUrl = URL.createObjectURL(audioBlob);
 
             audioPlayer.src = currentAudioUrl;
+            if (playbackSpeed) {
+                audioPlayer.playbackRate = parseFloat(playbackSpeed.value);
+            }
             nowPlayingTitle.textContent = `Now Playing: ${chapter.title}`;
             audioPlayerContainer.classList.remove('hidden');
             audioPlayer.play();
@@ -197,6 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- TTS Generation Logic (Ported from Listenova) ---
     const generateAudio = async (provider, apiKey, text) => {
         switch (provider) {
+            case 'kokoro':
+                return await generateAudioKokoro(text);
             case 'gemini':
                 return await generateAudioGemini(text, apiKey);
             case 'openai':
@@ -206,6 +223,68 @@ document.addEventListener('DOMContentLoaded', () => {
             default:
                 throw new Error('Unsupported provider');
         }
+    };
+
+    const generateAudioKokoro = async (text) => {
+        // Kokoro-TTS via HuggingFace Spaces Gradio API
+        // Gradio endpoint format for Kokoro usually accepts: text, voice, speed
+        // The space endpoint is https://hexgrad-kokoro-tts.hf.space/api/predict
+        // The /api/predict requires the fn_index (usually 0) and the data array
+        const response = await fetch('https://hexgrad-kokoro-tts.hf.space/call/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                data: [
+                    text,
+                    "af_heart", // Voice Name
+                    1.0 // speed is handled by the slider after generation, so default 1.0 here
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Kokoro API Error ${response.status}`);
+        }
+
+        const eventIdData = await response.json();
+        const eventId = eventIdData.event_id;
+
+        // Wait for Gradio to process the queue and return the audio file URL
+        return await new Promise((resolve, reject) => {
+            const checkStatus = async () => {
+                try {
+                    const res = await fetch(`https://hexgrad-kokoro-tts.hf.space/call/generate/${eventId}`);
+                    const textStr = await res.text();
+
+                    // Gradio streams Server Sent Events. Read the lines.
+                    const lines = textStr.split('\n');
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataObj = JSON.parse(line.substring(6));
+                            if (dataObj.msg === 'process_completed' && dataObj.success) {
+                                // Gradio returns the output. Usually an object with 'name' property
+                                // audio info: dataObj.output.data[0]
+                                const audioInfo = dataObj.output.data[0];
+                                // Need to fetch the actual audio blob from the Space
+                                const audioUrl = `https://hexgrad-kokoro-tts.hf.space/file=${audioInfo.name}`;
+                                const audioRes = await fetch(audioUrl);
+                                const blob = await audioRes.blob();
+                                resolve(blob);
+                                return;
+                            } else if (dataObj.msg === 'process_completed' && !dataObj.success) {
+                                reject(new Error('Kokoro generation failed.'));
+                                return;
+                            }
+                        }
+                    }
+
+                    setTimeout(checkStatus, 1000); // Poll again
+                } catch (e) {
+                    reject(e);
+                }
+            };
+            checkStatus();
+        });
     };
 
     const generateAudioGemini = async (text, apiKey) => {

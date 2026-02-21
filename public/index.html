@@ -157,15 +157,22 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">AI Voice Provider</label>
           <select id="ttsProvider"
             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-[#5b0ae5] focus:border-[#5b0ae5]">
+            <option value="kokoro" selected>Kokoro-TTS (HuggingFace) - Fast & Free</option>
             <option value="gemini">Gemini (Google) - Free Tier Available</option>
             <option value="openai">OpenAI (TTS-1)</option>
             <option value="elevenlabs">ElevenLabs</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-          <input type="password" id="ttsApiKey" placeholder="Enter your API Key"
+          <label class="block text-sm font-medium text-gray-700 mb-1">API Key (Leave blank for Kokoro)</label>
+          <input type="password" id="ttsApiKey" placeholder="Enter your API Key (If required)"
             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-[#5b0ae5] focus:border-[#5b0ae5]">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Playback Speed: <span
+              id="speedValue">1.0x</span></label>
+          <input type="range" id="playbackSpeed" min="0.5" max="2.0" step="0.1" value="1.0"
+            class="w-full accent-[#5b0ae5]">
         </div>
       </div>
 
