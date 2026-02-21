@@ -1,34 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Free Video to MP3 Converter | YouTube, Twitter, Facebook to MP3</title>
-  
-  <!-- SEO Tags (You already had these perfectly placed!) -->
-  <meta name="description" content="Convert video to MP3 free. Paste a YouTube, Twitter, Facebook, Vimeo or TikTok URL and download audio as MP3. No sign-up, no ads.">
-  <meta name="keywords" content="free YouTube to MP3 converter, video to MP3, download MP3, YouTube MP3, Twitter video to MP3, Facebook video download">
+
+  <!-- Rich SEO and Social Metadata -->
+  <meta name="description"
+    content="Free online video to MP3 converter. Instantly download high-quality audio from YouTube, TikTok, Twitter, Facebook, and Vimeo. No ads, no registration required.">
+  <meta name="keywords"
+    content="video to mp3, free video converter, youtube to mp3 converter, download mp3, tiktok to mp3, twitter video downloader, facebook video to mp3, fast mp3 downloader, online audio extractor, no ads converter">
   <link rel="canonical" href="https://globalnexus.online/">
-  
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://globalnexus.online/">
+  <meta property="og:title" content="Free Video to MP3 Converter | Fast & No Ads">
+  <meta property="og:description"
+    content="Instantly convert and download audio from YouTube, TikTok, Twitter, and more. 100% free, fast, and no registration required.">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://globalnexus.online/">
+  <meta property="twitter:title" content="Free Video to MP3 Converter | Fast & No Ads">
+  <meta property="twitter:description"
+    content="Instantly convert and download audio from YouTube, TikTok, Twitter, and more. 100% free, fast, and no registration required.">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
+  <!-- Enhanced JSON-LD Structured Data Schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Free Video to MP3 Converter",
-    "description": "Convert video URLs to MP3 audio. Supports YouTube, Twitter, Facebook, Vimeo and more.",
+    "@type": "SoftwareApplication",
+    "name": "Global Nexus Video to MP3 Converter",
+    "url": "https://globalnexus.online/",
+    "description": "A free, fast, and ad-free online tool to convert videos from YouTube, TikTok, Twitter, Facebook, and Vimeo directly into high-quality MP3 audio files.",
     "applicationCategory": "MultimediaApplication",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Convert YouTube to MP3",
+      "Convert TikTok to MP3",
+      "Download Twitter videos as audio",
+      "Extract audio from Facebook videos",
+      "No registration or ads"
+    ]
   }
   </script>
 </head>
+
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
   <!-- VibeCodes Header at the very top -->
-  <header style="background: linear-gradient(90deg, #5b0ae5, #763ecc); padding: 1rem; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  <header
+    style="background: linear-gradient(90deg, #5b0ae5, #763ecc); padding: 1rem; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     <h1 class="text-xl font-bold tracking-wide">Video to MP3 Converter</h1>
-    <p class="text-sm mt-1">Powered by <a href="https://vibecodes.space" style="color:#ffe873; text-decoration:underline; font-weight: bold;">VibeCodes.Space</a></p>
+    <p class="text-sm mt-1">Powered by <a href="https://vibecodes.space"
+        style="color:#ffe873; text-decoration:underline; font-weight: bold;">VibeCodes.Space</a></p>
   </header>
 
   <!-- Main Converter Box in the center -->
@@ -36,24 +70,30 @@
     <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg">
       <div class="text-center mb-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">Download Audio</h2>
-        <p class="text-gray-600 text-sm">Paste a video URL from YouTube, Twitter, Facebook, Vimeo or TikTok and download the audio as MP3.</p>
+        <p class="text-gray-600 text-sm">Paste a video URL from YouTube, Twitter, Facebook, Vimeo or TikTok and download
+          the audio as MP3.</p>
       </div>
-      
+
       <main>
         <form id="convertForm" class="space-y-4" novalidate>
           <div>
             <label for="url" class="block mb-2 font-medium text-gray-800">Video URL</label>
-            <input id="url" name="url" type="url" inputmode="url" autocomplete="url" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5b0ae5] focus:border-[#5b0ae5] transition-colors" placeholder="https://www.youtube.com/watch?v=..." required>
+            <input id="url" name="url" type="url" inputmode="url" autocomplete="url"
+              class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5b0ae5] focus:border-[#5b0ae5] transition-colors"
+              placeholder="https://www.youtube.com/watch?v=..." required>
           </div>
-          <button id="convertBtn" type="submit" class="bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold px-4 py-4 rounded-lg w-full transition-colors text-lg shadow-md">
+          <button id="convertBtn" type="submit"
+            class="bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold px-4 py-4 rounded-lg w-full transition-colors text-lg shadow-md">
             Convert to MP3
           </button>
         </form>
-        <div id="status" class="mt-4 text-sm text-center font-medium text-gray-700 min-h-[1.5rem]" role="status" aria-live="polite"></div>
+        <div id="status" class="mt-4 text-sm text-center font-medium text-gray-700 min-h-[1.5rem]" role="status"
+          aria-live="polite"></div>
       </main>
 
       <div class="mt-8 pt-6 border-t border-gray-100 text-center text-xs text-gray-500">
-        <p>Only download content you own or have permission to use. <br><a href="/terms.html" class="text-[#5b0ae5] hover:underline">Terms of Service</a></p>
+        <p>Only download content you own or have permission to use. <br><a href="/terms.html"
+            class="text-[#5b0ae5] hover:underline">Terms of Service</a></p>
       </div>
     </div>
   </div>
@@ -64,8 +104,10 @@
 
   <!-- VibeCodes Footer at the very bottom -->
   <footer style="background-color: #e5e7eb; padding: 1.5rem; text-align:center; font-size:0.9rem; color: #4b5563;">
-    Need a custom website? Visit <a href="https://vibecodes.space" target="_blank" style="color: #5b0ae5; text-decoration: underline; font-weight: 600;">VibeCodes.Space</a>.
+    Need a custom website? Visit <a href="https://vibecodes.space" target="_blank"
+      style="color: #5b0ae5; text-decoration: underline; font-weight: 600;">VibeCodes.Space</a>.
   </footer>
 
 </body>
+
 </html>
