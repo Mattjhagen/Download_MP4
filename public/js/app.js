@@ -1,4 +1,15 @@
 (function () {
+  // Check for Stripe Checkout redirect status
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('success') === 'true') {
+    const dName = urlParams.get('domain') || 'your domain';
+    setTimeout(() => alert(`Payment successful! The registration process for ${dName} has been initiated via Dynadot.`), 500);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  } else if (urlParams.get('canceled') === 'true') {
+    setTimeout(() => alert('Domain registration was canceled.'), 500);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   const form = document.getElementById('convertForm');
   const urlInput = document.getElementById('url');
   const convertBtn = document.getElementById('convertBtn');
@@ -95,11 +106,36 @@
                 <p class="font-bold text-lg text-green-700">✅ ${data.domain} is available!</p>
                 <p class="text-sm">Price: ${priceStr}</p>
               </div>
-              <a href="https://www.dynadot.com/" target="_blank" class="mt-4 sm:mt-0 bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold py-2 px-6 rounded-lg transition-colors">
+              <button id="buyDomainBtn" class="mt-4 sm:mt-0 bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold py-2 px-6 rounded-lg transition-colors">
                 Register Domain
-              </a>
+              </button>
             </div>
           `;
+
+          // Attach Stripe Checkout handler
+          document.getElementById('buyDomainBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('buyDomainBtn');
+            btn.disabled = true;
+            btn.textContent = 'Redirecting to Stripe...';
+            try {
+              const res = await fetch(apiBase + '/api/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain: data.domain, price: data.price || 15 }),
+              });
+              const checkoutData = await res.json();
+              if (checkoutData.url) {
+                window.location.href = checkoutData.url;
+              } else {
+                throw new Error(checkoutData.error || 'Failed to initialize checkout');
+              }
+            } catch (err) {
+              console.error('Checkout error:', err);
+              alert(err.message || 'Checkout failed. Please ensure Stripe is configured.');
+              btn.disabled = false;
+              btn.textContent = 'Register Domain';
+            }
+          });
         } else {
           domainResults.innerHTML = `
             <div class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg">

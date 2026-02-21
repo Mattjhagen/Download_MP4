@@ -9,6 +9,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 require('dotenv').config();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 if (ffmpegPath) {
   ffmpeg.setFfmpegPath(ffmpegPath);
@@ -25,6 +26,50 @@ if (!fs.existsSync(TMP_DIR)) {
 }
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Stripe Webhook MUST be placed before app.use(express.json()) to access the raw body
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle successful checkout
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const domain = session.metadata.domain;
+
+    if (domain) {
+      console.log(`Payment successful for domain: ${domain}. Registering via Dynadot...`);
+      try {
+        const apiKey = process.env.DYNADOT_API_KEY || '8z9R6Z7D8i8JF84LE7P8g7j9J9W706n9R9F6YRa7E7X';
+        const dynadotRes = await fetch('https://api.dynadot.com/api3.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            key: apiKey,
+            command: 'register',
+            domain0: domain,
+            duration0: '1'
+          })
+        });
+        const data = await dynadotRes.json();
+        console.log('Dynadot Registration Response:', data);
+      } catch (err) {
+        console.error('Failed to register domain with Dynadot:', err);
+      }
+    }
+  }
+
+  // Return a 200 response to acknowledge receipt of the event
+  res.json({ received: true });
+});
+
 app.use(express.json());
 app.use(cors({ origin: true }));
 
@@ -245,6 +290,51 @@ app.post('/api/check-domain', async (req, res) => {
       currency: 'USD',
       message: 'Demo mode - API unavailable'
     });
+  }
+});
+
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const { domain, price } = req.body;
+    if (!domain || !price) {
+      return res.status(400).json({ error: 'Missing domain name or price' });
+    }
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.warn('Stripe secret key is not set. Payments will fail.');
+      return res.status(500).json({ error: 'Stripe is not configured perfectly.' });
+    }
+
+    // Dynadot gives us the price, we pass it to Stripe in cents
+    const unitAmount = Math.round(parseFloat(price) * 100);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `Domain Registration: ${domain}`,
+              description: '1 Year Registration',
+            },
+            unit_amount: unitAmount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${req.headers.origin}?success=true&domain=${domain}`,
+      cancel_url: `${req.headers.origin}?canceled=true`,
+      metadata: {
+        domain: domain,
+      },
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Checkout Session error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
