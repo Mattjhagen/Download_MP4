@@ -12,24 +12,26 @@
 
   function setBusy(busy) {
     convertBtn.disabled = busy;
-    convertBtn.textContent = busy ? 'Converting…' : 'Convert to MP3';
+    convertBtn.textContent = busy ? 'Processing…' : 'Convert & Download';
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const url = urlInput.value.trim();
+    const format = document.getElementById('format').value || 'mp3';
+
     if (!url) {
       setStatus('Please enter a video URL.', true);
       return;
     }
-    setStatus('Processing…');
+    setStatus('Processing… This may take a few minutes for videos.');
     setBusy(true);
     try {
       const apiBase = (typeof window !== 'undefined' && window.API_BASE) ? window.API_BASE : '';
       const response = await fetch(apiBase + '/api/convert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, format }),
       });
       const contentType = response.headers.get('Content-Type') || '';
       if (!response.ok) {
@@ -41,7 +43,7 @@
       const blob = await response.blob();
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = 'audio.mp3';
+      link.download = format === 'mp3' ? 'audio.mp3' : 'video.mp4';
       link.click();
       window.URL.revokeObjectURL(link.href);
       setStatus('Download complete!');

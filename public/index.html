@@ -83,9 +83,18 @@
               class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5b0ae5] focus:border-[#5b0ae5] transition-colors"
               placeholder="https://www.youtube.com/watch?v=..." required>
           </div>
+          <div>
+            <label for="format" class="block mb-2 font-medium text-gray-800">Format</label>
+            <select id="format" name="format"
+              class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5b0ae5] focus:border-[#5b0ae5] transition-colors bg-white">
+              <option value="mp3" selected>Audio (MP3)</option>
+              <option value="mp4_hd">Video (MP4 HD - 1080p max)</option>
+              <option value="mp4_sd">Video (MP4 SD - 480p max)</option>
+            </select>
+          </div>
           <button id="convertBtn" type="submit"
             class="bg-[#5b0ae5] hover:bg-[#763ecc] text-white font-bold px-4 py-4 rounded-lg w-full transition-colors text-lg shadow-md">
-            Convert to MP3
+            Convert & Download
           </button>
         </form>
         <div id="status" class="mt-4 text-sm text-center font-medium text-gray-700 min-h-[1.5rem]" role="status"

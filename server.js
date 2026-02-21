@@ -115,10 +115,11 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
   const run = async () => {
     let videoFile;
     let audioFile;
+    let finalFile;
     let timeoutId;
 
     try {
-      const { url } = req.body;
+      const { url, format = 'mp3' } = req.body;
       if (!url) return res.status(400).json({ error: 'Missing URL' });
       if (!isValidVideoUrl(url)) {
         return res.status(400).json({ error: 'Unsupported or invalid video URL' });
@@ -129,24 +130,46 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
       const exec = getYtDlpExec();
 
       const conversionPromise = (async () => {
-        await exec.exec(url.trim(), {
-          output: videoFile,
-          format: 'bestaudio/best',
-          noCheckCertificates: true,
-          noWarnings: true,
-          preferFreeFormats: false,
-          addHeader: ['referer:https://www.youtube.com/', 'user-agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'],
-        });
+        if (format === 'mp3') {
+          // Audio only flow
+          await exec.exec(url.trim(), {
+            output: videoFile,
+            format: 'bestaudio/best',
+            noCheckCertificates: true,
+            noWarnings: true,
+            preferFreeFormats: false,
+            addHeader: ['referer:https://www.youtube.com/', 'user-agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'],
+          });
 
-        await new Promise((resolve, reject) => {
-          ffmpeg(videoFile)
-            .noVideo()
-            .audioCodec('libmp3lame')
-            .audioBitrate(128)
-            .save(audioFile)
-            .on('end', () => resolve())
-            .on('error', (err) => reject(err));
-        });
+          await new Promise((resolve, reject) => {
+            ffmpeg(videoFile)
+              .noVideo()
+              .audioCodec('libmp3lame')
+              .audioBitrate(128)
+              .save(audioFile)
+              .on('end', () => resolve())
+              .on('error', (err) => reject(err));
+          });
+          finalFile = audioFile;
+
+        } else {
+          // Video flow (mp4_hd or mp4_sd)
+          // bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best -> this ensures we get a single mp4 file or merge them
+          const formatString = format === 'mp4_hd'
+            ? 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+            : 'bestvideo[ext=mp4][height<=480]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+
+          await exec.exec(url.trim(), {
+            output: videoFile,
+            format: formatString,
+            mergeOutputFormat: 'mp4',
+            noCheckCertificates: true,
+            noWarnings: true,
+            preferFreeFormats: false,
+            addHeader: ['referer:https://www.youtube.com/', 'user-agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0'],
+          });
+          finalFile = videoFile;
+        }
       })();
 
       const timeoutPromise = new Promise((_, rej) => {
@@ -156,7 +179,9 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
       await Promise.race([conversionPromise, timeoutPromise]);
       clearTimeout(timeoutId);
 
-      res.download(audioFile, 'download.mp3', (err) => {
+      const downloadName = format === 'mp3' ? 'audio.mp3' : 'video.mp4';
+
+      res.download(finalFile, downloadName, (err) => {
         clearTimeout(timeoutId);
         removeFile(videoFile);
         removeFile(audioFile);
