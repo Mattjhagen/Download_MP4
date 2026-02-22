@@ -34,6 +34,12 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 const upload = multer({ dest: UPLOADS_DIR });
 
+app.get('/sitemap', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'), {
+    headers: { 'Content-Type': 'application/xml' }
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Stripe Webhook MUST be placed before app.use(express.json()) to access the raw body
