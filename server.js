@@ -235,6 +235,7 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
           fragmentRetries: 10,
           socketTimeout: 30,
           forceIpv4: true,
+          jsRuntimes: 'node',
           extractorArgs: 'youtube:player_client=android,web',
         };
         if (cookiesFile) {

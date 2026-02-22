@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp globally
-RUN pip3 install --no-cache-dir --upgrade yt-dlp --break-system-packages
+# Install yt-dlp globally with the EJS python dependency group for JS challenges
+RUN pip3 install --no-cache-dir --upgrade "yt-dlp[default]" --break-system-packages
 
 # Set yt-dlp path for the server to use
 ENV YT_DLP_PATH=/usr/local/bin/yt-dlp
