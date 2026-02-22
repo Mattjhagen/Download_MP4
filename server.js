@@ -211,7 +211,11 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
       // Setup cookies
       let cookiesFile = null;
       if (fs.existsSync('/etc/secrets/cookies.txt')) {
-        cookiesFile = '/etc/secrets/cookies.txt';
+        // Render Secrets are mounted read-only, and yt-dlp writes to the cookiejar on exit.
+        // We must copy it to /tmp so it has write permissions.
+        tempCookiesFile = path.join(TMP_DIR, `cookies-${uniqueId}.txt`);
+        fs.copyFileSync('/etc/secrets/cookies.txt', tempCookiesFile);
+        cookiesFile = tempCookiesFile;
       } else if (process.env.YOUTUBE_COOKIES) {
         tempCookiesFile = path.join(TMP_DIR, `cookies-${uniqueId}.txt`);
         fs.writeFileSync(tempCookiesFile, process.env.YOUTUBE_COOKIES);
