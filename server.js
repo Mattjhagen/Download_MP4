@@ -194,6 +194,7 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
     let audioFile;
     let finalFile;
     let timeoutId;
+    let tempCookiesFile;
     const reqId = randomUUID();
 
     try {
@@ -207,21 +208,38 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
       const uniqueId = randomUUID();
       videoFile = path.join(TMP_DIR, `${uniqueId}.%(ext)s`);
 
+      // Setup cookies
+      let cookiesFile = null;
+      if (fs.existsSync('/etc/secrets/cookies.txt')) {
+        cookiesFile = '/etc/secrets/cookies.txt';
+      } else if (process.env.YOUTUBE_COOKIES) {
+        tempCookiesFile = path.join(TMP_DIR, `cookies-${uniqueId}.txt`);
+        fs.writeFileSync(tempCookiesFile, process.env.YOUTUBE_COOKIES);
+        cookiesFile = tempCookiesFile;
+      }
+
       const conversionPromise = (async () => {
+        const baseParams = {
+          noPlaylist: true,
+          retries: 10,
+          fragmentRetries: 10,
+          socketTimeout: 30,
+          forceIpv4: true,
+          extractorArgs: 'youtube:player_client=android,web',
+        };
+        if (cookiesFile) {
+          baseParams.cookies = cookiesFile;
+        }
+
         if (format === 'mp3') {
           // Audio only flow using robust retry params
           audioFile = path.join(TMP_DIR, `${uniqueId}.mp3`);
           await exec.exec(url.trim(), {
+            ...baseParams,
             extractAudio: true,
             audioFormat: 'mp3',
             audioQuality: 0,
             output: audioFile,
-            noPlaylist: true,
-            retries: 10,
-            fragmentRetries: 10,
-            socketTimeout: 30,
-            forceIpv4: true,
-            extractorArgs: 'youtube:player_client=android,web',
           });
           finalFile = audioFile;
 
@@ -233,15 +251,10 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
             : 'bestvideo[height<=480]+bestaudio/best[height<=480]';
 
           await exec.exec(url.trim(), {
+            ...baseParams,
             output: videoFile,
             format: formatString,
             mergeOutputFormat: 'mp4',
-            noPlaylist: true,
-            retries: 10,
-            fragmentRetries: 10,
-            socketTimeout: 30,
-            forceIpv4: true,
-            extractorArgs: 'youtube:player_client=android,web',
           });
           finalFile = videoFile;
         }
@@ -265,6 +278,7 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
         clearTimeout(timeoutId);
         removeFile(audioFile);
         removeFile(videoFile);
+        if (tempCookiesFile) removeFile(tempCookiesFile);
         if (err && !res.headersSent) {
           console.error('Download send error:', err);
         }
@@ -273,6 +287,7 @@ app.post('/api/convert', convertRateLimiter, async (req, res) => {
       if (timeoutId) clearTimeout(timeoutId);
       removeFile(audioFile);
       removeFile(videoFile);
+      if (tempCookiesFile) removeFile(tempCookiesFile);
       const stderr = error.stderr || error.message || 'Unknown yt-dlp error';
       console.error(`[${reqId}] Conversion error trace:`, stderr);
 
